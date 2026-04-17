@@ -12,6 +12,9 @@ import yaml
 from contextlib import nullcontext
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
 class EasyConfig:
     def __init__(self, data: Dict[str, Any]):
         self._data = data
@@ -34,8 +37,49 @@ class EasyConfig:
         return EasyConfig(value) if isinstance(value, dict) else value
 
 
+def get_project_root() -> Path:
+    return PROJECT_ROOT
+
+
+def resolve_path(
+    path: str | os.PathLike[str],
+    *,
+    base_dir: str | os.PathLike[str] | None = None,
+    project_root_fallback: bool = True,
+    must_exist: bool = False,
+) -> Path:
+    raw = Path(path).expanduser()
+    if raw.is_absolute():
+        candidate = raw
+        if must_exist and not candidate.exists():
+            raise FileNotFoundError(f"Path not found: {candidate}")
+        return candidate
+
+    candidates: List[Path] = []
+
+    def add_candidate(candidate: Path) -> None:
+        if candidate not in candidates:
+            candidates.append(candidate)
+
+    if base_dir is not None:
+        add_candidate(Path(base_dir).expanduser() / raw)
+    add_candidate(Path.cwd() / raw)
+    if project_root_fallback:
+        add_candidate(PROJECT_ROOT / raw)
+
+    if must_exist:
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        attempted = "\n".join(f" - {candidate}" for candidate in candidates)
+        raise FileNotFoundError(f"Path not found: {path}. Tried:\n{attempted}")
+
+    return candidates[0]
+
+
 def load_config(path: str | os.PathLike[str]) -> EasyConfig:
-    with open(path, "r", encoding="utf-8") as f:
+    cfg_path = resolve_path(path, must_exist=True)
+    with open(cfg_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     return EasyConfig(cfg)
 
