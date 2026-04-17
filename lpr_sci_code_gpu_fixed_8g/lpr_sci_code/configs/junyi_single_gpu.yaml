@@ -1,0 +1,57 @@
+seed: 42
+data:
+  dataset_dir: ./data/processed/junyi
+  max_seq_len: 80
+  path_len: 10
+  kt_window_stride: 6
+  kt_eval_window_stride: 3
+  kt_max_train_samples: 120000
+  lpr_task_stride: 3
+  lpr_eval_task_stride: 1
+  lpr_max_train_tasks: 30000
+model:
+  hidden_dim: 96
+  dropout: 0.1
+  num_gnn_layers: 1
+variant:
+  graph_type: rgcn
+  kb_mode: kt
+  reward_mode: hierarchical
+  candidate_mode: review_augmented
+reward:
+  mastery_gain: 1.0
+  prereq_ok: 0.25
+  diff_match: 0.2
+  review_recover: 0.2
+  repeat_penalty: 0.1
+  target_bonus: 1.0
+  coherence: 0.2
+  path_cost: 0.05
+  hierarchy: 0.8
+train:
+  device: cuda
+  num_workers: 0
+  pin_memory: false
+  kt_batch_size: 8
+  kt_epochs: 8
+  kt_lr: 0.001
+  graph_epochs: 30
+  graph_lr: 0.001
+  graph_margin: 1.0
+  lpr_batch_size: 4
+  bc_epochs: 1
+  bc_lr: 0.001
+  rl_epochs: 1
+  rl_lr: 5.0e-05
+  ppo_epochs: 1
+  clip_eps: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  gamma: 0.99
+  gae_lambda: 0.95
+  gru4rec_batch_size: 32
+  gru4rec_epochs: 5
+  gru4rec_lr: 0.001
+output:
+  output_dir: ./outputs/junyi_single_gpu
+  kt_ckpt: ./outputs/junyi_single_gpu/kt_best.pt

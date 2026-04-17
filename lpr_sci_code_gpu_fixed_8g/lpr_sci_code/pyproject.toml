@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lpr-sci-code"
+version = "0.1.0"
+description = "Learning path recommendation codebase for the conservative SCI upgrade from the user's chapter 4"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "pandas",
+  "pyyaml",
+  "scikit-learn",
+  "torch",
+  "tqdm",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

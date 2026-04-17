@@ -1,0 +1,75 @@
+{
+  "variant": {
+    "graph_type": "rgcn",
+    "kb_mode": "kt",
+    "reward_mode": "hierarchical",
+    "candidate_mode": "review_augmented"
+  },
+  "validation": {
+    "difficulty_smoothness": 0.9681818181818181,
+    "difficulty_smoothness_std": 0.023618874648666514,
+    "hit_rate": 0.25,
+    "hit_rate_std": 0.4330127018922193,
+    "mastery_gain": 0.025311095584970602,
+    "mastery_gain_std": 0.04369529416024864,
+    "mrr": 0.75,
+    "mrr_std": 0.4330127018922193,
+    "ndcg@10": 0.75,
+    "ndcg@10_std": 0.4330127018922193,
+    "prereq_violation": 0.25,
+    "prereq_violation_std": 0.4330127018922193,
+    "review_coverage": 0.25,
+    "review_coverage_std": 0.4330127018922193
+  },
+  "test": {
+    "difficulty_smoothness": 0.9636363636363636,
+    "difficulty_smoothness_std": 0.018181818181818188,
+    "hit_rate": 0.5,
+    "hit_rate_std": 0.5,
+    "mastery_gain": 0.0009237100740692207,
+    "mastery_gain_std": 0.034237974594518605,
+    "mrr": 0.75,
+    "mrr_std": 0.4330127018922193,
+    "ndcg@10": 0.75,
+    "ndcg@10_std": 0.4330127018922193,
+    "prereq_violation": 0.5,
+    "prereq_violation_std": 0.5,
+    "review_coverage": 0.25,
+    "review_coverage_std": 0.4330127018922193
+  },
+  "reports": {
+    "behavior_cloning": {
+      "best": -1.9387725591659546,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 2.418440520763397,
+          "val_loss": 1.9387725591659546
+        }
+      ]
+    },
+    "rl": {
+      "best": 0.2753110955849706,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 2.6729012727737427,
+          "difficulty_smoothness": 0.9681818181818181,
+          "difficulty_smoothness_std": 0.023618874648666514,
+          "hit_rate": 0.25,
+          "hit_rate_std": 0.4330127018922193,
+          "mastery_gain": 0.025311095584970602,
+          "mastery_gain_std": 0.04369529416024864,
+          "mrr": 0.75,
+          "mrr_std": 0.4330127018922193,
+          "ndcg@10": 0.75,
+          "ndcg@10_std": 0.4330127018922193,
+          "prereq_violation": 0.25,
+          "prereq_violation_std": 0.4330127018922193,
+          "review_coverage": 0.25,
+          "review_coverage_std": 0.4330127018922193
+        }
+      ]
+    }
+  }
+}

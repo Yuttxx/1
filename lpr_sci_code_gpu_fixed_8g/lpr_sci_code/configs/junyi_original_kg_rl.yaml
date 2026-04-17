@@ -1,0 +1,56 @@
+seed: 42
+
+data:
+  dataset_dir: ./data/processed/junyi
+  max_seq_len: 100
+  path_len: 10
+
+model:
+  hidden_dim: 128
+  dropout: 0.10
+  num_gnn_layers: 2
+
+variant:
+  graph_type: transe
+  kb_mode: mean
+  reward_mode: sparse
+  candidate_mode: classic
+
+reward:
+  mastery_gain: 1.0
+  prereq_ok: 0.0
+  diff_match: 0.0
+  review_recover: 0.0
+  repeat_penalty: 0.0
+  target_bonus: 1.0
+  coherence: 0.0
+  path_cost: 0.0
+
+train:
+  device: cuda
+  num_workers: 0
+  pin_memory: true
+  kt_batch_size: 64
+  kt_epochs: 12
+  kt_lr: 0.001
+  graph_epochs: 120
+  graph_lr: 0.001
+  graph_margin: 1.0
+  lpr_batch_size: 32
+  bc_epochs: 4
+  bc_lr: 0.001
+  rl_epochs: 8
+  rl_lr: 0.0002
+  ppo_epochs: 2
+  clip_eps: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  gamma: 0.99
+  gae_lambda: 0.95
+  gru4rec_batch_size: 64
+  gru4rec_epochs: 10
+  gru4rec_lr: 0.001
+
+output:
+  output_dir: ./outputs/junyi_original_kgrl
+  kt_ckpt: ./outputs/junyi_original_kgrl/kt_best.pt
