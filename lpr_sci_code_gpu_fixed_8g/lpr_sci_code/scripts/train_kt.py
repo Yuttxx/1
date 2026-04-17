@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 
 import torch
 
-from lpr.common import ensure_dir, get_device, load_config, load_model_checkpoint, set_seed
+from lpr.common import ensure_dir, get_device, get_project_root, load_config, load_model_checkpoint, resolve_path, set_seed
 from lpr.data import load_standard_dataset
 from lpr.models import KnowledgeTracer
 from lpr.trainers import evaluate_kt, make_kt_loaders, train_knowledge_tracer
@@ -19,10 +20,24 @@ def main() -> None:
     parser.add_argument("--output_dir", default=None)
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
+    config_path = resolve_path(args.config, base_dir=Path.cwd(), must_exist=True)
+    cfg = load_config(config_path)
+    project_root = get_project_root()
+
     set_seed(cfg.seed)
-    dataset_dir = args.dataset_dir or cfg.data.dataset_dir
-    output_dir = ensure_dir(args.output_dir or cfg.output.output_dir)
+    dataset_dir_value = args.dataset_dir or cfg.data.dataset_dir
+    dataset_dir = resolve_path(
+        dataset_dir_value,
+        base_dir=Path.cwd() if args.dataset_dir else project_root,
+        must_exist=True,
+    )
+    output_dir_value = args.output_dir or cfg.output.output_dir
+    output_dir = ensure_dir(
+        resolve_path(
+            output_dir_value,
+            base_dir=Path.cwd() if args.output_dir else project_root,
+        )
+    )
     device = get_device(getattr(cfg.train, "device", None))
 
     dataset = load_standard_dataset(dataset_dir)
