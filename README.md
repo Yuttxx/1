@@ -1,6 +1,6 @@
 # LPR-SCI 实验代码（对应“第4章最省事、成功率最高版本”）
 
-> 2026-04 修复说明：本版额外修复了 **AMP 兼容问题、padding 与真实概念 ID 冲突、R-GCN 无显式图预训练、行为克隆标签不在候选集、KT/LPR 维度不一致自适应加载** 等常见崩溃点，并补上了 **R-GCN + 知识追踪背景 + 层级奖励** 的可运行版本。
+> 2026-04 修复说明：本版额外修复了 **AMP 兼容问题、padding 与真实概念 ID 冲突、R-GCN 无显式图预训练、行为克隆标签不在候选集、KT/LPR 维度不一致自适应加载、配置路径解析不稳** 等常见崩溃点，并补上了 **R-GCN + 知识追踪背景 + 层级奖励** 的可运行版本。
 
 这套代码把你原第4章的主线保留下来，并补成一套能直接做论文实验的工程：
 
@@ -14,7 +14,8 @@
 
 - **原版 KG-RL 近似复现**：`graph_type=transe`, `kb_mode=mean`, `reward_mode=sparse`, `candidate_mode=classic`
 - **保守升级版（推荐投稿版）**：`graph_type=rgcn`, `kb_mode=kt`, `reward_mode=hierarchical`, `candidate_mode=review_augmented`
-- **单卡 8GB 推荐配置**：`configs/junyi_rgcn_kt_hier_8g.yaml`（兼容别名：`configs/junyi_rgcn_kt_hier_stage2.yaml`）
+- **单卡 8GB 推荐配置**：`configs/junyi_rgcn_kt_hier_8g.yaml`
+- **兼容别名配置**：`configs/junyi_rgcn_kt_hier_stage2.yaml`
 - **TA-RL 风格消融**：`kb_mode=zero`
 - 简单基线：`random`, `popularity`, `seqknn`, `gru4rec`
 
@@ -66,7 +67,15 @@ python scripts/run_baselines.py --config configs/toy_full.yaml --dataset_dir ./t
 
 ## 4. JunYi 推荐命令
 
+现在 `configs/junyi_rgcn_kt_hier_8g.yaml` 和 `configs/junyi_rgcn_kt_hier_stage2.yaml` 都可用，内容保持一致。
+
 ```bash
 python scripts/train_kt.py --config configs/junyi_rgcn_kt_hier_8g.yaml --dataset_dir ./data/processed/junyi --output_dir ./outputs/junyi_rgcn_kt_hier_8g
-python scripts/train_lpr.py --config configs/junyi_rgcn_kt_hier_stage2.yaml --dataset_dir ./data/processed/junyi --kt_ckpt ./outputs/junyi_rgcn_kt_hier_8g/kt_best.pt --output_dir ./outputs/junyi_rgcn_kt_hier_8g
+python scripts/train_lpr.py --config configs/junyi_rgcn_kt_hier_8g.yaml --dataset_dir ./data/processed/junyi --kt_ckpt ./outputs/junyi_rgcn_kt_hier_8g/kt_best.pt --output_dir ./outputs/junyi_rgcn_kt_hier_8g
 ```
+
+## 5. 路径解析说明
+
+现在训练、评估和基线脚本会优先解析你传入的命令行路径；当配置文件里使用相对路径时，会自动兼容当前工作目录和项目根目录。
+
+这意味着即使你不是在仓库根目录下启动脚本，也不容易再因为 `configs/...yaml`、`data/...`、`outputs/...` 这类相对路径而报错。
