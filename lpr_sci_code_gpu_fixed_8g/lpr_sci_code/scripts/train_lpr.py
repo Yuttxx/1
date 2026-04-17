@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-from lpr.common import ensure_dir, get_device, load_config, load_model_checkpoint, set_seed, write_jsonl
+from lpr.common import ensure_dir, get_device, get_project_root, load_config, load_model_checkpoint, resolve_path, set_seed, write_jsonl
 from lpr.data import load_standard_dataset
 from lpr.models import KnowledgeBackgroundEncoder, KnowledgeTracer, LPRModel, PolicyValueNet, RGCNEncoder, TimeAwarePreferenceEncoder, TransEEncoder
 from lpr.rl import RewardWeights
@@ -22,10 +22,24 @@ def main() -> None:
     parser.add_argument("--output_dir", default=None)
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
+    config_path = resolve_path(args.config, base_dir=Path.cwd(), must_exist=True)
+    cfg = load_config(config_path)
+    project_root = get_project_root()
+
     set_seed(cfg.seed)
-    dataset_dir = args.dataset_dir or cfg.data.dataset_dir
-    output_dir = ensure_dir(args.output_dir or cfg.output.output_dir)
+    dataset_dir_value = args.dataset_dir or cfg.data.dataset_dir
+    dataset_dir = resolve_path(
+        dataset_dir_value,
+        base_dir=Path.cwd() if args.dataset_dir else project_root,
+        must_exist=True,
+    )
+    output_dir_value = args.output_dir or cfg.output.output_dir
+    output_dir = ensure_dir(
+        resolve_path(
+            output_dir_value,
+            base_dir=Path.cwd() if args.output_dir else project_root,
+        )
+    )
     device = get_device(getattr(cfg.train, "device", None))
 
     dataset = load_standard_dataset(dataset_dir)
@@ -42,9 +56,12 @@ def main() -> None:
     )
     print(f"[INFO] Training LPR on device={device}. cuda_available={torch.cuda.is_available()} num_nodes={dataset.num_nodes}")
 
-    kt_ckpt = args.kt_ckpt or getattr(cfg.output, "kt_ckpt", None) or str(output_dir / "kt_best.pt")
-    if not Path(kt_ckpt).exists():
-        raise FileNotFoundError(f"KT checkpoint not found: {kt_ckpt}. Please run scripts/train_kt.py first.")
+    kt_ckpt_value = args.kt_ckpt or getattr(cfg.output, "kt_ckpt", None) or str(output_dir / "kt_best.pt")
+    kt_ckpt = resolve_path(
+        kt_ckpt_value,
+        base_dir=Path.cwd() if args.kt_ckpt else project_root,
+        must_exist=True,
+    )
     kt_model = KnowledgeTracer(num_nodes=dataset.num_nodes, hidden_dim=cfg.model.hidden_dim, dropout=cfg.model.dropout)
     info = load_model_checkpoint(kt_model, kt_ckpt, map_location=device, strict=False, resize_mismatched=True)
     if info["resized"] or info["skipped"]:
