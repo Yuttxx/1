@@ -11,7 +11,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from lpr.baselines import GRU4RecBaseline, PopularityBaseline, RandomBaseline, SeqKNNBaseline
-from lpr.common import get_device, load_config, load_model_checkpoint, set_seed
+from lpr.common import ensure_dir, get_device, get_project_root, load_config, load_model_checkpoint, resolve_path, set_seed
 from lpr.data import GRU4RecDataset, collate_gru4rec, load_standard_dataset
 from lpr.metrics import (
     aggregate,
@@ -126,17 +126,27 @@ def main() -> None:
     parser.add_argument("--include_gru4rec", action="store_true")
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
+    config_path = resolve_path(args.config, base_dir=Path.cwd(), must_exist=True)
+    cfg = load_config(config_path)
+    project_root = get_project_root()
+
     set_seed(cfg.seed)
     device = get_device(getattr(cfg.train, "device", None))
-    dataset = load_standard_dataset(args.dataset_dir or cfg.data.dataset_dir)
-    out_dir = Path(args.output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    dataset_dir_value = args.dataset_dir or cfg.data.dataset_dir
+    dataset = load_standard_dataset(
+        resolve_path(
+            dataset_dir_value,
+            base_dir=Path.cwd() if args.dataset_dir else project_root,
+            must_exist=True,
+        )
+    )
+    out_dir = ensure_dir(resolve_path(args.output_dir, base_dir=Path.cwd()))
 
     from lpr.models import KnowledgeTracer
 
+    kt_ckpt = resolve_path(args.kt_ckpt, base_dir=Path.cwd(), must_exist=True)
     kt_model = KnowledgeTracer(num_nodes=dataset.num_nodes, hidden_dim=cfg.model.hidden_dim, dropout=cfg.model.dropout)
-    load_model_checkpoint(kt_model, args.kt_ckpt, map_location=device, strict=False, resize_mismatched=True)
+    load_model_checkpoint(kt_model, kt_ckpt, map_location=device, strict=False, resize_mismatched=True)
     kt_model.to(device).eval()
 
     results: Dict[str, Dict] = {}
